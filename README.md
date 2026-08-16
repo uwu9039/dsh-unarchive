@@ -31,7 +31,7 @@ Archiving is no longer a black hole: a new sidebar entry lists every archived se
 npm pack
 
 # 2) 安装到 web profile
-dsh plugin --profile web add dsh-unarchive-0.1.2.tgz
+dsh plugin --profile web add dsh-unarchive-0.1.7.tgz
 ```
 
 官方参考：
@@ -84,3 +84,7 @@ src/client.js  客户端插件：侧边栏入口(sidebar.footer.action) + 浮层
 ## 原创性与许可 / Originality & License
 
 本插件全部代码为原创实现，仅按公开 API 契约编写（未复制 DSH 源码）；图标为原创内联 SVG；文案为原创措辞。MIT License，详见 [LICENSE](./LICENSE)。
+
+
+
+

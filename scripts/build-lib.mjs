@@ -10,14 +10,10 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 let src = readFileSync(join(root, 'src', 'client.js'), 'utf8');
 
-// 1) Strip the ESM imports; the factory wrapper provides them via require().
-src = src.replace(/^import React from 'react';\n/m, '');
-src = src.replace(/^import \{ IconArchiveOutline20, IconCloseOutline16 \} from '@deepseek-ai\/dsh-client-ui-primitives';\n/m, '');
-
-// 2) Module-scope name -> factory-scope var (referenced by the object shorthand).
+// 1) Module-scope name -> factory-scope var (referenced by the object shorthand).
 src = src.replace("export const name = 'dsh-unarchive';", 'var name = "dsh-unarchive";');
 
-// 3) Default export object -> plain object literal.
+// 2) Default export object -> plain object literal.
 src = src.replace('export default {', 'var plugin = {');
 
 const header = `// dsh-unarchive — client bundle (built artifact, ModuleLoader format).
@@ -30,8 +26,6 @@ window.__ModuleLoader__.load({
 		var module = { exports: {} };
 		var exports = module.exports;
 		Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-		var React = require("react");
-		var { IconArchiveOutline20, IconCloseOutline16 } = require("@deepseek-ai/dsh-client-ui-primitives");
 `;
 
 const footer = `		exports.name = plugin.name;
