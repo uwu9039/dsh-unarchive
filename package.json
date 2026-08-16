@@ -1,7 +1,15 @@
 {
   "name": "dsh-unarchive",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Archived-session recycle bin for DeepSeek Harness: list every archived session, preview its content, and restore it back to its original workspace — plus an optional archive confirmation.",
+  "homepage": "https://github.com/uwu9039/dsh-unarchive#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uwu9039/dsh-unarchive.git"
+  },
+  "bugs": {
+    "url": "https://github.com/uwu9039/dsh-unarchive/issues"
+  },
   "type": "module",
   "main": "./src/index.js",
   "exports": {

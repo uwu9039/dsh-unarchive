@@ -1,5 +1,9 @@
 # dsh-unarchive
 
+[![npm version](https://img.shields.io/npm/v/dsh-unarchive)](https://www.npmjs.com/package/dsh-unarchive)
+[![npm downloads](https://img.shields.io/npm/dm/dsh-unarchive)](https://www.npmjs.com/package/dsh-unarchive)
+[![license](https://img.shields.io/npm/l/dsh-unarchive)](./LICENSE)
+
 归档会话回收站 · An archived-session recycle bin for [DeepSeek Harness](https://deepseek-harness.github.io/deepseek-harness/) (DSH).
 
 查看已归档会话、预览内容、恢复到原工作区；另有一个默认关闭的归档二次确认开关。
