@@ -1,0 +1,12 @@
+# Node
+node_modules/
+
+# 本地 npm 缓存（npm pack 的临时缓存目录）
+.npm-cache/
+
+# 发布 tarball（由 npm pack 生成；如需分发请发布到 GitHub Releases）
+*.tgz
+
+# 本地状态
+*.log
+.DS_Store

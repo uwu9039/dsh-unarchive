@@ -1,0 +1,9 @@
+# dsh-unarchive bundle patch: inserts its host plugin row into the profile.
+# Install with `dsh plugin --profile <name> add <path-or-tarball>`.
+- insert:
+    - id: unarchive
+      name: dsh-unarchive
+      config:
+        confirmOnArchive: false
+        showButton: true
+        previewEnabled: true
