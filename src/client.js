@@ -725,11 +725,15 @@ export default {
       // (the Loader mounts entries concurrently), so keep retrying until it
       // arrives; a 60s fail-open backstop lets archiving through if the dialog
       // can never be answered.
+      // NOTE: ctx.effect(cb) RUNS cb immediately and treats cb's RETURN value
+      // as the dispose-time cleanup. The restore must be RETURNED from the
+      // effect, never executed inline — an inline restore uninstalls the
+      // wrapper the moment it is installed, so confirmation never appears.
       const MARK = '__dshUnarchiveGuard';
       const installGuard = () => {
         const workspaces = ctx.get('workspaces');
         if (!workspaces || typeof workspaces.archiveSession !== 'function') return false;
-        if (workspaces[MARK]) return true;
+        if (workspaces[MARK]) return true; // already wrapped by this instance
         const original = workspaces.archiveSession.bind(workspaces);
         const next = async (sessionId) => {
           if (!state.settings.confirmOnArchive) return original(sessionId);
@@ -744,15 +748,34 @@ export default {
               }
             }).catch(() => { /* keep id suffix fallback */ });
           });
-          const allowed = await Promise.race([ask(), timer.timeout(60000).then(() => true)]);
+          const timerSvc = ctx.get('timer');
+          const timeout = timerSvc && typeof timerSvc.timeout === 'function'
+            ? timerSvc.timeout(60000).then(() => true)
+            : new Promise((resolve) => { setTimeout(() => resolve(true), 60000); });
+          const allowed = await Promise.race([ask(), timeout]);
           if (!allowed) return;
           return original(sessionId);
         };
-        workspaces[MARK] = { original, next };
-        workspaces.archiveSession = next;
-        ctx.effect(() => {
-          if (workspaces[MARK] && workspaces[MARK].next === next) {
-            workspaces.archiveSession = workspaces[MARK].original;
+        try {
+          workspaces[MARK] = { original, next };
+          try {
+            workspaces.archiveSession = next;
+            if (workspaces.archiveSession !== next) throw new Error('assignment ignored');
+          } catch {
+            // Sealed/frozen service object: fall back to a configurable redefinition.
+            Object.defineProperty(workspaces, 'archiveSession', { value: next, writable: true, configurable: true });
+            if (workspaces.archiveSession !== next) throw new Error('redefinition ignored');
+          }
+        } catch {
+          try { delete workspaces[MARK]; } catch { /* ignore */ }
+          warn('archive guard unavailable: workspaces.archiveSession is not replaceable (confirmation disabled, archiving unchanged)');
+          return true; // fail-open: never block archiving
+        }
+        // Restore the original method only when this plugin unloads.
+        ctx.effect(() => () => {
+          const rec = workspaces[MARK];
+          if (rec && rec.next === next) {
+            try { workspaces.archiveSession = rec.original; } catch { /* best effort */ }
             delete workspaces[MARK];
           }
         });
@@ -760,7 +783,7 @@ export default {
       };
       if (!installGuard()) {
         const iv = setInterval(() => { if (installGuard()) clearInterval(iv); }, 1000);
-        ctx.effect(() => clearInterval(iv));
+        ctx.effect(() => () => clearInterval(iv));
       }
 
       console.log('[dsh-unarchive] client ready');
